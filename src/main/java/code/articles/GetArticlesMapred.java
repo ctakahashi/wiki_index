@@ -49,8 +49,6 @@ public class GetArticlesMapred {
 		@Override
 		protected void setup(Mapper<LongWritable, WikipediaPage, Text, Text>.Context context)
 				throws IOException, InterruptedException {
-			// TODO: You should implement people articles load from
-			// DistributedCache here
 			
 			ClassLoader cl = GetArticlesMapred.class.getClassLoader();
 			
@@ -82,24 +80,9 @@ public class GetArticlesMapred {
 		@Override
 		public void map(LongWritable offset, WikipediaPage inputPage, Context context)
 				throws IOException, InterruptedException {
-			// TODO: You should implement getting article mapper here
 			
 			String title = inputPage.getTitle();
 			
-			//COMMENTED OUT TOKENIZING THE TITLES
-			/*
-			String[] titleTokens = title.split(" ");
-			String currentCheck = "";
-			
-			for(int i = 0; i < titleTokens.length; i++) {
-				for(int j = i; j < titleTokens.length; j++) {
-					currentCheck += titleTokens[j] + " ";
-				}
-				if(currentCheck.length() > 0) {
-					//trim the extra space
-					if(currentCheck.charAt(currentCheck.length() - 1) == ' ') {
-						currentCheck = currentCheck.substring(0, currentCheck.length() - 1);
-						*/
 			//add if this section of the title is one of the names from people.txt
 			if(names.contains(title)) {
 				//map the title text and the page text
@@ -108,19 +91,11 @@ public class GetArticlesMapred {
 							
 				context.write(new Text(), pageText);
 			}
-					/*}
-				}
-				currentCheck = "";
-			}*/
 			
-			//only map if title is in hashset of names
-			//context.add(offset, inputPage)
 		}
 	}
 
 	public static void main(String[] args) throws Exception {
-		// TODO: you should implement the Job Configuration and Job call
-		
 		Configuration conf = new Configuration();
 		
 		//set up the arguments given by the user

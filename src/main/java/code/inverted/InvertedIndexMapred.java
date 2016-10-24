@@ -48,7 +48,7 @@ public class InvertedIndexMapred {
 			// For each StringInteger, extract the lemma and frequency.
 			for (StringInteger lemma_freq : lemma_freqs.getIndices()) {
 				lemma.set(lemma_freq.getString().trim());
-				context.write(lemma, new StringInteger(articleId, lemma_freq.getValue()));
+				context.write(lemma, new StringInteger(articleId.toString(), lemma_freq.getValue()));
 			}
 		}
 	}

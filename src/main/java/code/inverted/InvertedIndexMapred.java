@@ -27,6 +27,8 @@ import code.util.StringIntegerList.StringInteger;
 public class InvertedIndexMapred {
 
 	/* 
+	 * This class creates an index that maps an article to a <lemma, frequency> pair  
+	 * 
 	 * Input:
 	 * article1 <lemma1, frequency> <lemma2, frequency>
 	 * 
@@ -35,22 +37,25 @@ public class InvertedIndexMapred {
 	 * lemma1 <article2, frequency>
 	 */	
 	public static class InvertedIndexMapper extends Mapper<Text, Text, Text, StringInteger> {
-		public static StringIntegerList lemma_freqs;
 		public static Text lemma = new Text();
 		public static String articleIdKey;
 
-		public void map(Text articleTitle, Text indices, Context context) throws IOException, InterruptedException {
-			articleIdKey = articleTitle.toString();
-			lemma_freqs = new StringIntegerList();
+		public void map(Text articleId, Text indices, Context context) throws IOException, InterruptedException {
+			articleId = new Text(articleId.toString().trim());
+			indices = new Text(indices.toString().trim());
+			StringIntegerList lemma_freqs = new StringIntegerList();
 			lemma_freqs.readFromString(indices.toString());
+			// For each StringInteger, extract the lemma and frequency.
 			for (StringInteger lemma_freq : lemma_freqs.getIndices()) {
-				lemma.set(lemma_freq.getString());
-				context.write(lemma, new StringInteger(articleIdKey, lemma_freq.getValue()));
+				lemma.set(lemma_freq.getString().trim());
+				context.write(lemma, new StringInteger(articleId, lemma_freq.getValue()));
 			}
 		}
 	}
 
 	/* 
+	 * This class creates the inverted index for one lemma mapping lemma to the article and frequency. 
+	 * 
 	 * Input:
 	 * lemma1 <article1, frequency>, <article2, frequency>
 	 * 
@@ -58,11 +63,11 @@ public class InvertedIndexMapred {
 	 * lemma1 {<article1, frequency>, <article2, frequency>}
 	 */	
 	public static class InvertedIndexReducer extends Reducer<Text, StringInteger, Text, StringIntegerList> {
-		public static List<StringInteger> temp;
 
 		public void reduce(Text lemma, Iterable<StringInteger> articlesAndFreqs, Context context)
 				throws IOException, InterruptedException {
-			temp = new ArrayList<StringInteger>();
+			lemma = new Text(lemma.toString().trim());
+			List<StringInteger> temp = new ArrayList<StringInteger>();
 			for (StringInteger articleAndFreq : articlesAndFreqs) {
 				temp.add(new StringInteger(articleAndFreq.getString(), articleAndFreq.getValue()));
 			}
@@ -81,6 +86,7 @@ public class InvertedIndexMapred {
 		job.setMapperClass(InvertedIndexMapper.class);
 		job.setReducerClass(InvertedIndexReducer.class);
 		
+		// Read key/value pair as input.	
 		job.setInputFormatClass(KeyValueTextInputFormat.class);
 
 		job.setMapOutputKeyClass(Text.class);

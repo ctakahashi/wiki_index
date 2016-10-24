@@ -347,6 +347,12 @@ class Stemmer{
 	}
 	if (b[k] == 'l' && doublec(k) && m() > 1) k--;
 	}
+	
+	private final void step7() {
+		if (ends("-")) {
+			k--;
+		}
+	}
 
 	/** Stem the word placed into the Stemmer buffer through calls to add().
 	 * Returns true if the stemming process resulted in a word different
@@ -356,7 +362,7 @@ class Stemmer{
 	public void stem() {
 		k = i - 1;
 		if (k > 1) { 
-			step1(); step2(); step3(); step4(); step5(); step6(); 
+			step1(); step2(); step3(); step4(); step5(); step6(); step7();
 		}
 
 		i_end = k+1; i = 0;

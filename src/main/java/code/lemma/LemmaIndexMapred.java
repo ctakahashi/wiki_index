@@ -13,6 +13,10 @@ import org.apache.hadoop.mapreduce.lib.input.FileInputFormat;
 import org.apache.hadoop.mapreduce.lib.output.FileOutputFormat;
 import org.apache.hadoop.util.GenericOptionsParser;
 
+import com.google.common.collect.HashMultiset;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Multiset;
+
 import code.util.StringIntegerList;
 import code.util.WikipediaPageInputFormat;
 
@@ -29,35 +33,19 @@ import edu.umd.cloud9.collection.wikipedia.WikipediaPage;
  */
 public class LemmaIndexMapred {
 	public static class LemmaIndexMapper extends Mapper<LongWritable, WikipediaPage, Text, StringIntegerList> {
-		public Map<String, Integer> index = new HashMap<String, Integer>(); //map for counting lemma frequency
 		private Tokenizer t = new Tokenizer();
 		
 		@Override
 		public void map(LongWritable offset, WikipediaPage page, Context context) throws IOException,
 				InterruptedException {
 			// TODO: implement Lemma Index mapper here
-			
-			//tokenizes the WikipediaPage
-			String text = page.getContent();
-			String title = page.getTitle();
-			List<String> list = t.tokenize(text);
-				
-			for(String str : list) {
-//				lemma.set(str);
-//				if(!index.isEmpty() && index.containsKey(lemma.toString())) {
-//					index.put(lemma.toString(), index.get(lemma.toString()) + 1);
-//				} else {
-//					index.put(lemma.toString(), 1);
-//				}
-				if(!index.isEmpty() && index.containsKey(str)) {
-					index.put(str, index.get(str) + 1);
-				} else {
-					index.put(str, 1);
-				}
-			} 
-			context.write(new Text(title), new StringIntegerList(index));
-//			context.write(new Text(title), new Text(text));
-		
+			Multiset<String> index = HashMultiset.create();
+			index.addAll(t.tokenize(page.getContent()));
+			Map<String, Integer> map = new HashMap<>();
+			for(String word : index.elementSet()) {
+				map.put(word, index.count(word));
+			}
+			context.write(new Text(page.getTitle()), new StringIntegerList(map));
 		}
 	}
 	

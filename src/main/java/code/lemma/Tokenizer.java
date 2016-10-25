@@ -21,18 +21,23 @@ public class Tokenizer {
 	}
 
 	public List<String> tokenize(String text) {
-        // Clean up special characters and periods
+        // Clean up special characters
 		String cleaned = text.replaceAll(CLEANUP_REGEX, " ");
 		Stemmer stemmer = new Stemmer();
 		List<String> stems = new LinkedList<String>();
+		// Initialize position to 0
 		int pos = 0, end;
 		String s = "";
+		// While there is a ' ' starting at position pos of the text, continue (update end so that we can determine next pos to start)
 		while ((end = cleaned.indexOf(' ', pos)) >= 0) {
+			// Want to lowercase everything so that stop words can be detected and to decrease variations (Program vs. program)
 			s = cleaned.substring(pos, end).toLowerCase();
+			// Remove stopwords
 			if (!STOPWORD_SET.contains(s)) {
 				for (int j = 0; j < s.length(); j++) {
 					if (Character.isLetter(s.charAt(j)) || 
 							((s.charAt(j) == '-' || s.charAt(j) == '.') && j != 0 && j != s.length()-1)) {
+						// Stemmer requires array of characters rather than String (most likely because original code was written in C)
 						stemmer.add(s.charAt(j));
 					}
 				}
@@ -41,6 +46,7 @@ public class Tokenizer {
 				if (s.length() > 0 && s.charAt(0) != '.' && !s.equals("a"))
 					stems.add(s);
 			}
+			// Update position of the text to read the next token
 			pos = end + 1;
 		}
         return stems;

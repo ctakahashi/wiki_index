@@ -38,10 +38,12 @@ public class LemmaIndexMapred {
 		@Override
 		public void map(LongWritable offset, WikipediaPage page, Context context) throws IOException,
 				InterruptedException {
-			// TODO: implement Lemma Index mapper here
+			// Create a Guava Multiset for efficient counting
 			Multiset<String> index = HashMultiset.create();
+			// Tokenize the page content (which removes wiki markup) and add to multiset
 			index.addAll(t.tokenize(page.getContent()));
 			Map<String, Integer> map = new HashMap<>();
+			// Iterate through multiset and add words and counts to HashMap
 			for(String word : index.elementSet()) {
 				map.put(word, index.count(word));
 			}
